@@ -25,6 +25,7 @@ public class Block : MonoBehaviour
     private void Start()
     {
         CreateBlock();
+        CombineSides();
     }
 
     //Funkcja tworząca ściany kostki.
@@ -51,8 +52,12 @@ public class Block : MonoBehaviour
         MeshFilter meshFilter = blockSide.AddComponent(typeof(MeshFilter)) as MeshFilter;
         meshFilter.mesh = mesh;
 
+
+        /*
         MeshRenderer meshRenderer = blockSide.AddComponent(typeof(MeshRenderer)) as MeshRenderer;
         meshRenderer.material = material;
+        */
+
     }
 
     //Funkcja generuje wartości Mesha na podstawie strony ściany kostki
@@ -116,6 +121,34 @@ public class Block : MonoBehaviour
                 break;
         }
         return mesh;
+    }
+
+    //Function combine a sides of cube
+    //TODO Do przeniesienia
+    void CombineSides()
+    {
+        MeshFilter[] meshFilters = GetComponentsInChildren<MeshFilter>();
+        CombineInstance[] combineSides = new CombineInstance[meshFilters.Length];
+        int index = 0;
+        foreach(MeshFilter meshFilter in meshFilters)
+        {
+            combineSides[index].mesh = meshFilter.sharedMesh;
+            combineSides[index].transform = meshFilter.transform.localToWorldMatrix;
+            index++;
+        }
+
+        MeshFilter blockMeshFilter = this.gameObject.AddComponent(typeof(MeshFilter)) as MeshFilter;
+        blockMeshFilter.mesh = new Mesh();
+        blockMeshFilter.mesh.CombineMeshes(combineSides);
+
+        MeshRenderer blockMeshRenderer = this.gameObject.AddComponent(typeof(MeshRenderer)) as MeshRenderer;
+        blockMeshRenderer.material = material;
+
+        foreach(Transform side in this.transform)
+        {
+            Destroy(side.gameObject);
+        }
+
     }
     
 }
